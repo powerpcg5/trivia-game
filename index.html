@@ -1,0 +1,348 @@
+<!--************************************************************************
+    * trivia-game/index.html
+    * JavaScript Timers Trivia Game
+    *
+    * 1708 Wednesday, 13 March 2019 (EDT) [17968]
+    *
+    * University of Richmond Coding Boot Camp run by Trilogy Education Services
+    * Austin Kim
+    *
+    * Modified:
+    *   2333 Thursday, 14 March 2019 (EDT) [17969]
+    *   2328 Friday, 15 March 2019 (EDT) [17970]
+    *   0132 Saturday, 16 March 2019 (EDT) [17971]
+    ************************************************************************-->
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='en'>
+  <head>
+    <meta charset='utf-8'/>
+    <meta name='viewport'
+      content='width=device-width, initial-scale=1, shrink-to-fit=no'/>
+    <!--Bootstrap CSS-->
+    <link rel='stylesheet'
+      href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'
+      integrity='sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T'
+      crossorigin='anonymous'/>
+    <!--CSS stylesheet-->
+    <link rel='stylesheet' type='text/css' href='assets/css/style.css'/>
+    <title>JavaScript Timers Trivia Game</title>
+    <script defer src='assets/javascript/app.js'></script>
+  </head>
+  <body>
+    <!--Bootstrap navigation bar-->
+    <nav class='navbar navbar-light bg-light'>
+      <a class='navbar-brand' href='index.html'>JavaScript Timers Trivia
+        Game</a>
+      <button type='button' class='btn btn-outline-danger' data-toggle='modal'
+        data-target='#resetModal' id='resetAll'>Reset All</button>
+      <button type='button' class='btn btn-outline-warning' id='pause'>Pause
+        Game</button>
+      <button type='button' class='btn btn-outline-success' id='newGame'>New
+        Game</button>
+      <button type='button' class='btn btn-outline-info' data-toggle='modal'
+        data-target='#instructionsModal'
+        id='instructions'>Instructions</button>
+      <button type='button' class='btn btn-outline-primary' data-toggle='modal'
+        data-target='#settingsModal' id='settings'>Settings</button>
+    </nav>
+    <!--Main game container-->
+    <main class='container mt-4'>
+      <div class='row border-top border-left border-right'>
+        <div class='col border-right text-center' id='player1'>Player 1</div>
+        <div class='col border-left  text-center' id='player2'>Player 2</div>
+      </div>
+      <div class='row border-top border-left border-right'>
+        <div class='col text-center'>Score</div>
+      </div>
+      <div class='row border-left border-right'>
+        <div class='col border-right text-center' id='p1score'>0</div>
+        <div class='col border-left  text-center' id='p2score'>0</div>
+      </div>
+      <div class='row border-top border-left border-right'>
+         <div class='col text-center'>Points</div>
+      </div>
+      <div class='row border-left border-right'>
+        <div class='col border-right text-center' id='p1points'>0</div>
+        <div class='col border-left  text-center' id='p2points'>0</div>
+      </div>
+      <div class='row border-top border-left border-right'>
+        <div class='col text-center' id='category'>Category</div>
+      </div>
+      <div class='row border-left border-right'>
+        <div class='col border-right text-center' class='question'
+          id='p1question'></div>
+        <div class='col border-left  text-center' class='question'
+          id='p2question'></div>
+      </div>
+      <div class='row border-left border-right'>
+        <div class='col border-right text-center' class='answer'
+          id='p1answer0'></div>
+        <div class='col border-left  text-center' class='answer'
+          id='p2answer0'></div>
+      </div>
+      <div class='row border-left border-right'>
+        <div class='col border-right text-center' class='answer'
+          id='p1answer1'></div>
+        <div class='col border-left  text-center' class='answer'
+          id='p2answer1'></div>
+      </div>
+      <div class='row border-left border-right'>
+        <div class='col border-right text-center' class='answer'
+          id='p1answer2'></div>
+        <div class='col border-left  text-center' class='answer'
+          id='p2answer2'></div>
+      </div>
+      <div class='row border-left border-right'>
+        <div class='col border-right text-center' class='answer'
+          id='p1answer3'></div>
+        <div class='col border-left  text-center' class='answer'
+          id='p2answer3'></div>
+      </div>
+      <div class='row border-top border-left border-right border-bottom'>
+        <div class='col border-right text-center' id='p1status'></div>
+        <div class='col border-left  text-center' id='p2status'></div>
+      </div>
+    </main>
+    <!--Reset modal-->
+    <div class='modal fade' id='resetModal' tabindex='-1' role='dialog'
+      aria-labelledby='resetModalLabel' aria-hidden='true'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
+          <div class='modal-header'>
+            <h5 class='modal-title' id='resetModalLabel'>JavaScript Timers
+              Trivia Game</h5>
+            <button type='button' class='close' data-dismiss='modal'
+              aria-label='Close'>
+              <span aria-hidden='true'>&times;</span>
+            </button>
+          </div>
+          <div class='modal-body'>
+            <div class='md-form'>
+              <label for='player1name'>Player 1 name:</label>
+              <input type='text' class='form-control' id='player1name'
+                placeholder='Player 1'/>
+              <label class='mt-3' for='player2name'>Player 2 name:</label>
+              <input type='text' class='form-control' id='player2name'
+                placeholder='Player 2'/>
+              <p class='mt-3'>Click on OK to start the game.</p>
+            </div>
+          </div>
+          <div class='modal-footer'>
+            <button type='button' class='btn btn-secondary'
+              data-dismiss='modal' id='resetModalCancel'>Cancel</button>
+            <button type='button' class='btn btn-primary' data-dismiss='modal'
+              id='resetModalOK'>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Settings modal-->
+    <div class='modal fade' id='settingsModal' tabindex='-1' role='dialog'
+      aria-labelledby='settingsModalLabel' aria-hidden='true'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
+          <div class='modal-header'>
+            <h5 class='modal-title' id='settingsModalLabel'>JavaScript Timer
+              Trivia Game</h5>
+          </div>
+          <div class='modal-body'>
+            <div class='md-form'>
+              <label for='questions' id='questionsPrompt'>Number of questions
+                per game (maximum 50):</label>
+              <input type='text' class='form-control' id='questions'
+                placeholder='20'/>
+              <label class='mt-3' for='category'
+                id='categoryPrompt'>Category:</label>
+              <select class='custom-select' id='category'>
+                <option selected>Select a question category</option>
+                <option value='9'>General Knowledge</option>
+                <option value='10'>Entertainment:  Books</option>
+                <option value='11'>Entertainment:  Film</option>
+                <option value='12'>Entertainment:  Music</option>
+                <option value='13'>Entertainment:  Musicals and Theatre</option>
+                <option value='14'>Entertainment:  Television</option>
+                <option value='15'>Entertainment:  Video Games</option>
+                <option value='16'>Entertainment:  Board Games</option>
+                <option value='17'>Science and Nature</option>
+                <option value='18'>Science:  Computers</option>
+                <option value='19'>Science:  Mathematics</option>
+                <option value='20'>Mythology</option>
+                <option value='21'>Sports</option>
+                <option value='22'>Geography</option>
+                <option value='23'>History</option>
+                <option value='24'>Politics</option>
+                <option value='25'>Art</option>
+                <option value='26'>Celebrities</option>
+                <option value='27'>Animals</option>
+                <option value='28'>Vehicles</option>
+                <option value='29'>Entertainment:  Comics</option>
+                <option value='30'>Science:  Gadgets</option>
+                <option value='31'>Entertainment:  Japanese Anime and
+                  Manga</option>
+                <option value='32'>Entertainment:  Cartoons and
+                  Animations</option>
+              </select>
+              <label class='mt-3' for='difficulty'
+                id='difficultyPrompt'>Difficulty:</label>
+              <select class='custom-select' id='difficulty'>
+                <option selected>Select level of difficulty</option>
+                <option value='easy'>Easy</option>
+                <option value='medium'>Medium</option>
+                <option value='hard'>Hard</option>
+              </select>
+              <label class='mt-3' for='type' id='typePrompt'>Type:</label>
+              <select class='custom-select' id='type'>
+                <option selected>Select question type</option>
+                <option value=''>Any type</option>
+                <option value='multiple'>Multiple-choice</option>
+                <option value='boolean'>True/false</option>
+              </select>
+              <label class='mt-3' for='timeout' id='timeoutPrompt'>Timeout
+                duration for each question in seconds:</label>
+              <input type='text' class='form-control' id='timeout'
+                placeholder='30'/>
+            </div>
+          </div>
+          <div class='modal-footer'>
+            <button type='button' class='btn btn-secondary'
+              data-dismiss='modal' id='settingsModalCancel'>Cancel</button>
+            <button type='button' class='btn btn-primary' data-dismiss='modal'
+              id='settingsModalOK'>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Invalid questions modal-->
+    <div class='modal fade' id='invalidQuestionsModal' tabindex='-1'
+      role='dialog' aria-labelledby='invalidQuestionsLabel' aria-hidden='true'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
+          <div class='modal-header'>
+            <h5 class='modal-title' id='invalidQuestionsLabel'>JavaScript
+              Timers Trivia Game</h5>
+          </div>
+          <div class='modal-body'>
+            <p>The number of questions per game must be an even number between
+              2 and 50.</p>
+          </div>
+          <div class='modal-footer'>
+            <button type='button' class='btn btn-primary' data-dismiss='modal'
+              id='invalidQuestionsOK'>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Invalid timeout modal-->
+    <div class='modal fade' id='invalidTimeoutModal' tabindex='-1'
+      role='dialog' aria-labelledby='invalidTimeoutLabel' aria-hidden='true'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
+          <div class='modal-header'>
+            <h5 class='modal-title' id='invalidTimeoutLabel'>JavaScript Timers
+              Trivia Game</h5>
+          </div>
+          <div class='modal-body'>
+            <p>The timeout duration for each question must be at least 1
+              second.</p>
+          </div>
+          <div class='modal-footer'>
+            <button type='button' class='btn btn-primary' data-dismiss='modal'
+              id='invalidTimeoutOK'>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Instructions modal-->
+    <div class='modal fade' id='instructionsModal' tabindex='-1' role='dialog'
+      aria-labelledby='instructionsModalLabel' aria-hidden='true'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
+          <div class='modal-header'>
+            <h5 class='modal-title' id='instructionsModalLabel'>JavaScript
+              Timers Trivia Game</h5>
+          </div>
+          <div class='modal-body'>
+            <p id='instructionsText'>Enter your player names (or click on
+              Cancel to accept the defaults); then take turns answering the
+              timed questions using either your mouse (or other pointing
+              device), or using your keyboard (type
+              <code>A</code>&mdash;<code>D</code> to select answers
+              A.&mdash;D., respectively).  You have 30 seconds to answer each
+              question.  Every correctly answered question awards one point;
+              whoever finishes the game with the most points wins the game.</p>
+            <p>Trivia questions and answers are taken from the Open Trivia
+              Database at <a
+              href='https://opentdb.com/'>https://opentdb.com/</a></p>
+            <p>Clicking on the Settings button allows you to set the number of
+              questions per game, the question category, the level of
+              difficulty, the question type (multiple-choice vs. true or
+              false), and the timeout duration for each question.  These
+              settings take effect on the next game.</p>
+            <p>The first player&rsquo;s turn for the first game is chosen at
+              random; the first player&rsquo;s turn then alternates in
+              subsequent games.  After a game is complete, click on New Game to
+              begin a new game; or optionally click on Reset All to reset
+              everything, including player names and player scores.  Good luck!
+              :)</p>
+          </div>
+          <div class='modal-footer'>
+            <button type='button' class='btn btn-primary' data-dismiss='modal'
+              id='instructionsModalOK'>OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--Footer-->
+<!--<div class='container fixed-bottom'>-->
+    <div class='container'>
+      <div class='row'>
+        <div class='col'>
+          <hr class='lainbow'/>
+        </div>
+      </div>
+      <div class='row justify-content-between'>
+        <div class='col-auto'>
+          Copyright &copy; 2019 Austin Kim under the terms of the <a
+            href='https://opensource.org/licenses/MIT/'>MIT License</a>.<br
+          />Last modified at 0132 Saturday, 16 March 2019 (EDT) [17971].<br
+          />Send errors and broken links to freennix at gmail dot com.
+        </div>
+        <!--Tooltips must be placed on _img_ elements for proper positioning-->
+        <div class='col-auto'>
+          <a href='https://validator.w3.org/check?uri=referer'><img
+            src='https://www.w3.org/QA/Tools/I_heart_validator_lg.png'
+            title='Valid HTML 5!' alt='Valid HTML 5!'
+            data-toggle='tooltip'/></a>
+          <a href='https://opentdb.com/'><img
+            src='https://opentdb.com/images/logo.png' title='Powered by Open
+            Trivia Database' alt='Powered by Open Trivia Database' class='logo'
+            data-toggle='tooltip'/></a>
+<!--CSS not valid due to Bootstrap
+          <a href='https://jigsaw.w3.org/css-validator/check?uri=referer'><img
+            src='https://jigsaw.w3.org/css-validator/images/vcss.png'
+            title='Valid CSS level 3!' alt='Valid CSS level 3!'
+            data-toggle='tooltip'/></a>
+-->
+        </div>
+      </div>
+    </div>
+    <!--jQuery (slim build)-->
+    <script src='https://code.jquery.com/jquery-3.3.1.slim.min.js'
+      integrity='sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo'
+      crossorigin='anonymous'></script>
+    <!--Popper.js-->
+    <script
+      src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js'
+      integrity='sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1'
+      crossorigin='anonymous'></script>
+    <!--Bootstrap-->
+    <script
+      src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js'
+      integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM'
+      crossorigin='anonymous'></script>
+    <!--Enable Bootstrap tooltips-->
+    <script>
+      $("[data-toggle='tooltip']").tooltip()
+    </script>
+  </body>
+</html>

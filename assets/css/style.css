@@ -1,0 +1,65 @@
+ /****************************************************************************
+  * trivia-game/assets/css/style.css
+  * CSS stylesheet for JavaScript Timers Trivia Game
+  *
+  * 2257 Thursday, 14 March 2019 (EDT) [17969]
+  *
+  * University of Richmond Coding Boot Camp run by Triology Education Services
+  * Austin Kim
+  *
+  * Modified:
+  ****************************************************************************/
+
+ /* Body */
+body {
+  background-color: #fff7e9;
+  background-image: url('../images/background.jpeg');
+  background-position: top;
+  background-repeat: repeat-y}
+
+ /* Declare base font size */
+:root {
+  --main-font-size: 48px}
+
+ /* Player names */
+#player1, #player2 {
+  font-size: var(--main-font-size)}
+
+ /* Player scores */
+#p1score, #p2score {
+  font-size: var(--main-font-size)}
+
+ /* Player points */
+#p1points, #p2points {
+  font-size: var(--main-font-size)}
+
+ /* Trivia */
+.question, .answer {
+  font-size: calc(1.5 * var(--main-font-size))}
+
+.question {
+  font-style: italic}
+
+.answer:hover {
+  text-decoration: underline}
+
+ /* Classes for highlighting answers as correct vs. incorrect */
+.correct {
+  color: green}
+
+.incorrect {
+  color: red}
+
+ /* Player status/message */
+#p1status, #p2status {
+  font-size: var(--main-font-size)}
+
+ /* Footer */
+hr.lainbow {
+  background-image: url('../images/lainbow.png');
+  height: 2px}
+
+ /* Logos */
+.logo {
+  background-color: #383e4d;
+  width: 101px}
