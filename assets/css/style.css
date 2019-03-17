@@ -8,6 +8,7 @@
   * Austin Kim
   *
   * Modified:
+  *   0555 Sunday, 17 March 2019 (EDT) [17972]
   ****************************************************************************/
 
  /* Body */
@@ -35,7 +36,7 @@ body {
 
  /* Trivia */
 .question, .answer {
-  font-size: calc(1.5 * var(--main-font-size))}
+  font-size: 24px}
 
 .question {
   font-style: italic}

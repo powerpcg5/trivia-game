@@ -10,6 +10,7 @@
  // Modified:
  //   0006 Friday, 15 March 2019 (EDT) [17970]
  //   0325 Saturday, 16 March 2019 (EDT) [17971]
+ //   0601 Sunday, 17 March 2019 (EDT) [17972]
  //////////////////////////////////////////////////////////////////////////////
 
  // GLOBAL PARAMETERS, VARIABLES, AND OBJECTS
@@ -53,14 +54,14 @@ var game = {
   pause: true,                           // Game paused (ignore click/keyboard)
 
    // Per-question variables
-  categoryName = '',                     // Category name
-  pQuestion = '',                        // Trivia question
-  numAnswers = 0,                        // The number of possible answers
-  pAnswer0 = '',                         // Answer (A.)
-  pAnswer1 = '',                         // Answer (B.)
-  pAnswer2 = '',                         // Answer (C.)
-  pAnswer3 = '',                         // Answer (D.)
-  pCorrect = 0,                          // Correct answer (0=A, 1=B, 2=C, 3=D)
+  categoryName: '',                      // Category name
+  pQuestion: '',                         // Trivia question
+  numAnswers: 0,                         // The number of possible answers
+  pAnswer0: '',                          // Answer (A.)
+  pAnswer1: '',                          // Answer (B.)
+  pAnswer2: '',                          // Answer (C.)
+  pAnswer3: '',                          // Answer (D.)
+  pCorrect: 0,                           // Correct answer (0=A, 1=B, 2=C, 3=D)
 
  // init() method:  Initialize game
   init() {
@@ -75,22 +76,25 @@ var game = {
     whoWentFirst = this.turn
    // Get trivia questions for game
     var queryURL = `https://opentdb.com/api.php?amount=${questions}`
-    if (this.category !== 0) queryURL += `&category=${this.category}`
-    if (this.difficulty !== '') queryURL += `&difficulty=${this.difficulty}`
-    if (this.type !== '') queryURL += `&type=${this.type}`
+    if (category !== 0) queryURL += `&category=${category}`
+    if (difficulty !== '') queryURL += `&difficulty=${difficulty}`
+    if (type !== '') queryURL += `&type=${type}`
+   // Debug
+    console.log(`queryURL:  ${queryURL}`)
+   // API call
     $.ajax({url: queryURL, method: 'GET'}).then(function(response) {
       if (response.response_code !== 0)
         $('#category').text(`Error: response_code = ${response.response_code}`)
         else {
-          this.results = response.results
+          game.results = response.results
          // Get first question
-          this.getQuestion()
+          game.getQuestion()
          // Start a new game
           gameOver = false
          // Start interval timer
-          this.countdown = timeout
-          this.displayProgress()
-          this.pause = false
+          game.countdown = timeout
+          game.displayProgress()
+          game.pause = false
           intervalTimer = setInterval(countdownFunction, 1000)}
       })
     return},
@@ -153,12 +157,12 @@ var game = {
   displayQuestion() {
     $('#category').text(`Category:  ${this.categoryName}`)
     if (this.turn === 0) {
-      $('#p1question').text(this.pQuestion)
-      $('#p1answer0').text(`(A.)  ${this.pAnswer0}`)
-      $('#p1answer1').text(`(B.)  ${this.pAnswer1}`)
-      if (this.numAnswers >= 3) $('#p1answer2').text(`(C.)  ${this.pAnswer2}`)
+      $('#p1question').html(this.pQuestion)
+      $('#p1answer0').html(`(A.)  ${this.pAnswer0}`)
+      $('#p1answer1').html(`(B.)  ${this.pAnswer1}`)
+      if (this.numAnswers >= 3) $('#p1answer2').html(`(C.)  ${this.pAnswer2}`)
         else $('#p1answer2').empty()
-      if (this.numAnswers >= 4) $('#p1answer3').text(`(D.)  ${this.pAnswer3}`)
+      if (this.numAnswers >= 4) $('#p1answer3').html(`(D.)  ${this.pAnswer3}`)
         else $('#p1answer3').empty()
       $('#p2question').empty()
       $('#p2answer0').empty()
@@ -202,8 +206,8 @@ var game = {
     var percent = Math.round(100 * this.countdown / timeout)
     $('.progress-bar').attr('aria-valuenow', percent.toString())
     $('.progress-bar').css('width', `${percent}%`)
-    $('.progress-bar').text(`${percent}%`)
-    return}
+    $('.progress-bar').text(`${this.countdown} sec.`)
+    return},
 
  // updateTurn():  Update player turn on page
   updateTurn() {
@@ -259,37 +263,26 @@ function countdownFunction() {
     game.pause = true
     if (game.turn === 1) {
       $('#p1status').empty()
-      $('#p1status').text('Time')
-      switch (game.pCorrect) {
-        case 0:
-          $('#p1answer0').addClass('correct')
-          break
-        case 1:
-          $('#p1answer1').addClass('correct')
-          break
-        case 2:
-          $('#p1answer2').addClass('correct')
-          break
-        case 3:
-          $('#p1answer3').addClass('correct')
-          }
-      }
+      $('#p1status').text('Time')}
       else {
         $('#p2status').empty()
-        $('#p2status').text('Time')
-        switch (game.pCorrect) {
-          case 0:
-            $('#p2answer0').addClass('correct')
-            break
-          case 1:
-            $('#p2answer1').addClass('correct')
-            break
-          case 2:
-            $('#p2answer2').addClass('correct')
-            break
-          case 3:
-            $('#p2answer3').addClass('correct')
-            }
+        $('#p2status').text('Time')}
+    switch (game.pCorrect) {
+      case 0:
+        game.turn === 1 ? $('#p1answer0').addClass('correct')
+                        : $('#p2answer0').addClass('correct')
+        break
+      case 1:
+        game.turn === 1 ? $('#p1answer1').addClass('correct')
+                        : $('#p2answer1').addClass('correct')
+        break
+      case 2:
+        game.turn === 1 ? $('#p1answer2').addClass('correct')
+                        : $('#p2answer2').addClass('correct')
+        break
+      case 3:
+        game.turn === 1 ? $('#p1answer3').addClass('correct')
+                        : $('#p2answer3').addClass('correct')
         }
    // Delay before advancing to next question
     timeoutTimer = setTimeout(timeoutFunction, delay)}
@@ -316,8 +309,19 @@ function timeoutFunction() {
     updateScore()
     gameOver = true}
     else {
-      $('#p1status').empty()
-      $('#p2status').empty()
+     // Unhighlight all answers
+      if (game.turn === 1) {
+        $('#p1answer0').removeClass('correct incorrect')
+        $('#p1answer1').removeClass('correct incorrect')
+        $('#p1answer2').removeClass('correct incorrect')
+        $('#p1answer3').removeClass('correct incorrect')
+        $('#p1status').empty()}
+        else {
+          $('#p2answer0').removeClass('correct incorrect')
+          $('#p2answer1').removeClass('correct incorrect')
+          $('#p2answer2').removeClass('correct incorrect')
+          $('#p2answer3').removeClass('correct incorrect')
+          $('#p2status').empty()}
       game.turn = 3 - game.turn
      // Get next question
       game.getQuestion()
@@ -325,25 +329,41 @@ function timeoutFunction() {
       game.countdown = timeout
       game.displayProgress()
       game.pause = false
-      intervalTimer = setInterval(countdownFunction, 1000)
+      intervalTimer = setInterval(countdownFunction, 1000)}
   return}
 
  // MODAL CALLBACK FUNCTIONS
 
  // If _Reset All_ be clicked, stop any currently playing game
 $('#resetAll').click(function() {
+   // Unpause game if paused
+  $('#pause').removeClass('btn-warning')
+  $('#pause').text('Pause Game')
+  $('#pause').addClass('btn-outline-warning')
    // Clear all timers
   clearInterval(intervalTimer)
   clearTimeout(timeoutTimer)
+   // Remove any progress bars
+  $('#p1status').empty()
+  $('#p2status').empty()
+   // Stop game
   gameOver = true
   return}
   )
 
  // Likewise, if _New Game_ be clicked, stop any currently playing game
 $('#newGame').click(function() {
+   // Unpause game if paused
+  $('#pause').removeClass('btn-warning')
+  $('#pause').text('Pause Game')
+  $('#pause').addClass('btn-outline-warning')
    // Clear all timers
   clearInterval(intervalTimer)
   clearTimeout(timeoutTimer)
+   // Remove any progress bars
+  $('#p1status').empty()
+  $('#p2status').empty()
+   // Stop game
   gameOver = true
    // Initialize game
   game.init()
@@ -352,23 +372,22 @@ $('#newGame').click(function() {
 
  // If _Pause Game_ be clicked, toggle game.pause and suspend/reactivate timers
 $('#pauseGame').click(function() {
-   // Pause game
-  if (game.pause === false) {
-    game.pause = true
-     // Clear interval timer
-    clearInterval(intervalTimer)
-    $('#pause').removeClass('btn-outline-warning')
-    $('#pause').text('Unpause Game')
-    $('#pause').addClass('btn-warning')}
-   // Unpause game
-    else {
-      $('#pause').removeClass('btn-warning')
-      $('#pause').text('Pause Game')
-      $('#pause').addClass('btn-outline-warning')
-      if (game.countdown > 0) {
+  if (!gameOver && game.countdown !== 0) {
+    if (!game.pause) {
+     // Pause game
+      game.pause = true
+      clearInterval(intervalTimer)
+      $('#pause').removeClass('btn-outline-warning')
+      $('#pause').text('Unpause Game')
+      $('#pause').addClass('btn-warning')}
+      else {
+     // Unpause game
+        $('#pause').removeClass('btn-warning')
+        $('#pause').text('Pause Game')
+        $('#pause').addClass('btn-outline-warning')
         intervalTimer = setInterval(countdownFunction, 1000)
         game.pause = false}
-      }
+    }
   return}
   )
 
@@ -387,7 +406,7 @@ $('#resetModalOK').click(function() {
 
  // When the settings modal is activated, autofocus on the first input field
 $('#settingsModal').on('shown.bs.modal', function() {
-  $('#goalRangeLower').trigger('focus')
+  $('#questions').trigger('focus')
   return}
   )
 
@@ -401,7 +420,7 @@ $('#settingsModalOK').click(function() {
     else number = parseInt(value)
    // Validate number of questions
   if (isNaN(number)) $('#invalidQuestionsModal').modal('show')
-    else if (number > 50 || number % 2 !== 0)
+    else if (number < 2 || number > 50 || number % 2 !== 0)
       $('#invalidQuestionsModal').modal('show')
       else {
         questions = number
@@ -410,160 +429,158 @@ $('#settingsModalOK').click(function() {
         if (value === '') number = 0
           else number = parseInt(value)
    // Validate question category
-////GOT HERE
         if (isNaN(number)) number = 0
-          else if (number < 9 || number >= 33) number = 0
+          else if (number < 9 || number >= 32) number = 0
+            else category = number
+   // Get difficulty level
+        value = $('#difficulty').val()
+        if (value === 'easy' || value === 'medium' || value === 'hard')
+          difficulty = value
+          else difficulty = ''
+   // Get question type
+        value = $('#type').val()
+        if (value === 'multiple' || value === 'boolean') type = value
+          else type = ''
+   // Get timeout duration for each question in seconds
+        value = $('#timeout').val()
+        if (value === '') number = timeout
+          else number = parseInt(value)
+   // Validate timeout duration for each question
+        if (isNaN(number)) $('#invalidTimeoutModal').modal('show')
+          else if (number < 1) $('#invalidTimeoutModal').modal('show')
             else {
-              category = number
-   // Get crystal point range lower limit
-              element = document.getElementById('crystalRangeLower')
-              value = element.value
-              if (value === '') number = crystalRangeLower
-                else number = parseInt(value)
-   // Validate crystal point range lower limit
-              if (isNaN(number)) $('#invalidCrystalPointModal').modal('show')
-                else if (number < 1)
-                  $('#invalidCrystalPointModal').modal('show')
-                  else {
-                    crystalRangeLower = number
-   // Get crystal point range upper limit
-                    element = document.getElementById('crystalRangeUpper')
-                    value = element.value
-                    if (value === '') number = crystalRangeUpper
-                      else number = parseInt(value)
-   // Validate crystal point range upper limit
-                    if (isNaN(number))
-                      $('#invalidCrystalPointModal').modal('show')
-                      else if (number < crystalRangeLower ||
-                       goalRangeUpper < number)
-                        $('#invalidCrystalPointModal').modal('show')
-                        else {
-                          crystalRangeUpper = number
+              timeout = number
    // Finally, update the instructions with these new numbers
-                          element = document.getElementById('instructionsText')
-                          var instructions = 'Enter your player names (or ' +
-                            'click on Cancel to accept the defaults); then ' +
-                            'take turns collecting (clicking on) crystals ' +
-                            'to add them to your collection.  Each crystal ' +
-                            'has a random point value from ' +
-                            crystalRangeLower.toString() +
-                            (crystalRangeLower === 1 ? ' point ' : ' points ') +
-                            'to ' + crystalRangeUpper.toString() +
-                            (crystalRangeUpper === 1 ? ' point ' : ' points ') +
-                            '(which is fixed for the duration of the game).  ' +
-                            'Your goal is to collect crystals in order to ' +
-                            'accumulate points up to, but not exceeding, ' +
-                            'the point goal, which is a random number from ' +
-                            goalRangeLower.toString() + ' to ' +
-                            goalRangeUpper.toString() +
-                            (goalRangeUpper === 1 ? ' point ' : ' points ') +
-                            '(also fixed for the duration of the game).'
-                          element.textContent = instructions}
-                    }
-              }
+              var instructions = 'Enter your player names (or click on ' +
+                'Cancel to accept the defaults); then take turns answering ' +
+                'the timed questions using either your mouse (or other ' +
+                'pointing device), or using your keyboard (type ' +
+                '<code>A</code>&mdash;<code>D</code> to select answers ' +
+                'A.&mdash;D., respectively).  You have ' + timeout.toString() +
+                (timeout === 1 ? ' second ' : ' seconds ') +
+                'to answer each question.  Every correctly answered ' +
+                'question awards one point; whoever finishes the game with ' +
+                'the most points wins the game.'
+              $('#instructionsText').html(instructions)}
         }
-  })
+  return}
+  )
 
- // This function is called when a user clicks on _OK_ in the invalid goal
- //   range modal
-$('#invalidGoalRangeOK').click(function() {
+ // This function is called when a user clicks on _OK_ in the invalid questions
+ //   modal
+$('#invalidQuestionsOK').click(function() {
    // Return to settings modal
-  $('#settingsModal').modal('show')}
+  $('#settingsModal').modal('show')
+  return}
   )
 
- // This function is called when a user clicks on _OK_ in the invalid crystal
- //   point range modal
-$('#invalidCrystalPointOK').click(function() {
+ // This function is called when a user clicks on _OK_ in the invalid timeout
+ //   modal
+$('#invalidTimeoutOK').click(function() {
    // Return to settings modal
-  $('#settingsModal').modal('show')}
+  $('#settingsModal').modal('show')
+  return}
   )
 
- // These functions are called when a user clicks on the corresponding crystals
- //   or on the Pass button
-$('#pass').click(function() {
-  addCrystal(-1)}
+ // These functions are called when a user clicks on the corresponding answer
+ //   fields
+$('#p1answer0').click(function() {
+  selectAnswer(1, 0)
+  return}
   )
-$('#crystal0').click(function() {
-  addCrystal(0)}
+$('#p1answer1').click(function() {
+  selectAnswer(1, 1)
+  return}
   )
-$('#crystal1').click(function() {
-  addCrystal(1)}
+$('#p1answer2').click(function() {
+  selectAnswer(1, 2)
+  return}
   )
-$('#crystal2').click(function() {
-  addCrystal(2)}
+$('#p1answer3').click(function() {
+  selectAnswer(1, 3)
+  return}
   )
-$('#crystal3').click(function() {
-  addCrystal(3)}
+$('#p2answer0').click(function() {
+  selectAnswer(2, 0)
+  return}
+  )
+$('#p2answer1').click(function() {
+  selectAnswer(2, 1)
+  return}
+  )
+$('#p2answer2').click(function() {
+  selectAnswer(2, 2)
+  return}
+  )
+$('#p2answer3').click(function() {
+  selectAnswer(2, 3)
+  return}
   )
 
- // This main function is called when a user has clicked on a crystal (or Pass)
-function addCrystal(crystal) {
-  var element                            // DOM element pointer
-  if (gameOver) return
-  switch (crystal) {
-   // Case -1:  User has clicked on the Pass button
-    case -1:
-      if (game.turn === 1 && game.p2pass || game.turn === 2 && game.p1pass) {
-        else {
-          if (game.turn === 1) game.p1pass = true
-            else               game.p2pass = true
-          game.turn = 3 - game.turn
-          game.updateTurn()}
-      return
-   // Cases 0--3:  User has clicked on the corresponding crystal
+ // This function is called when a key is pressed
+$(document).keyup(function(event) {
+  var key = event.key.toUpperCase()
+  if (key.length === 1 && key >= 'A' && key <= 'D')
+    selectAnswer(game.turn, key.charCodeAt(0) - 65)
+  return}
+  )
+
+ // This main function is called when a user has attempted to select an answer
+function selectAnswer(turn, option) {
+  if (gameOver || game.pause || turn !== game.turn || option >= game.numAnswers)
+    return
+  clearInterval(intervalTimer)
+   // Highlight correct answer in green
+  switch (game.pCorrect) {
     case 0:
-      if (game.turn === 1) game.p1points += game.crystal0
-        else               game.p2points += game.crystal0
+      turn === 1 ? $('#p1answer0').addClass('correct')
+                 : $('#p2answer0').addClass('correct')
       break
     case 1:
-      if (game.turn === 1) game.p1points += game.crystal1
-        else               game.p2points += game.crystal1
+      turn === 1 ? $('#p1answer1').addClass('correct')
+                 : $('#p2answer1').addClass('correct')
       break
     case 2:
-      if (game.turn === 1) game.p1points += game.crystal2
-        else               game.p2points += game.crystal2
+      turn === 1 ? $('#p1answer2').addClass('correct')
+                 : $('#p2answer2').addClass('correct')
       break
     case 3:
-      if (game.turn === 1) game.p1points += game.crystal3
-        else               game.p2points += game.crystal3
+      turn === 1 ? $('#p1answer3').addClass('correct')
+                 : $('#p2answer3').addClass('correct')
       }
-  if (game.turn === 1) game.p1pass = false
-    else               game.p2pass = false
-  game.addCrystal(crystal)
-  updatePoints()
-  if (game.p1points === game.goal) {
-    element = document.getElementById('p1turn')
-    element.textContent = 'You win'
-    ++score.p1
-    updateScore()
-    gameOver = true}
-    else if (game.p2points === game.goal) {
-      element = document.getElementById('p2turn')
-      element.textContent = 'You win'
-      ++score.p2
-      updateScore()
-      gameOver = true}
-      else if (game.p1points > game.goal) {
-        element = document.getElementById('p1turn')
-        element.textContent = 'Bust'
-        element = document.getElementById('p2turn')
-        element.textContent = 'You win'
-        ++score.p2
-        updateScore()
-        gameOver = true}
-        else if (game.p2points > game.goal) {
-          element = document.getElementById('p2turn')
-          element.textContent = 'Bust'
-          element = document.getElementById('p1turn')
-          element.textContent = 'You win'
-          ++score.p1
-          updateScore()
-          gameOver = true}
-          else {
-            game.updateTurn()}
+   // If answer be incorrect, highlight incorrect answer in red
+  if (option !== game.pCorrect) {
+    switch (option) {
+      case 0:
+        turn === 1 ? $('#p1answer0').addClass('incorrect')
+                   : $('#p2answer0').addClass('incorrect')
+        break
+      case 1:
+        turn === 1 ? $('#p1answer1').addClass('incorrect')
+                   : $('#p2answer1').addClass('incorrect')
+        break
+      case 2:
+        turn === 1 ? $('#p1answer2').addClass('incorrect')
+                   : $('#p2answer2').addClass('incorrect')
+        break
+      case 3:
+        turn === 1 ? $('#p1answer3').addClass('incorrect')
+                   : $('#p2answer3').addClass('incorrect')
+        }
+    turn === 1 ? $('#p1status').text('Incorrect')
+               : $('#p2status').text('Incorrect')}
+    else {
+      turn === 1 ? $('#p1status').text('Correct')
+                 : $('#p2status').text('Correct')
+      if (turn === 1) ++game.p1points
+        else ++game.p2points
+      game.updatePoints()}
+   // Delay before advancing to next question
+  timeoutTimer = setTimeout(timeoutFunction, delay)
   return}
 
  // Show reset modal to start it all
 $(document).ready(function() {
-  $('#resetModal').modal('show')}
+  $('#resetModal').modal('show')
+  return}
   )
