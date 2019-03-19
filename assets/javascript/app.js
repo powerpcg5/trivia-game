@@ -12,7 +12,7 @@
  //   0325 Saturday, 16 March 2019 (EDT) [17971]
  //   0601 Sunday, 17 March 2019 (EDT) [17972]
  //   2353 Monday, 18 March 2019 (EDT) [17973]
- //   0111 Tuesday, 19 March 2019 (EDT) [17974]
+ //   0128 Tuesday, 19 March 2019 (EDT) [17974]
  //////////////////////////////////////////////////////////////////////////////
 
  // GLOBAL PARAMETERS, VARIABLES, AND OBJECTS
@@ -170,10 +170,16 @@ var game = {
     if (this.turn === 1) {
       $('#p1question').html(this.pQuestion)
       $('#p1answer0').html(`(A.)  ${this.pAnswer0}`)
+      $('#p1answer0').removeClass('incorrect correct')
       $('#p1answer1').html(`(B.)  ${this.pAnswer1}`)
-      if (this.numAnswers >= 3) $('#p1answer2').html(`(C.)  ${this.pAnswer2}`)
+      $('#p1answer1').removeClass('incorrect correct')
+      if (this.numAnswers >= 3) {
+        $('#p1answer2').html(`(C.)  ${this.pAnswer2}`)
+        $('#p1answer2').removeClass('incorrect correct')}
         else $('#p1answer2').empty()
-      if (this.numAnswers >= 4) $('#p1answer3').html(`(D.)  ${this.pAnswer3}`)
+      if (this.numAnswers >= 4) {
+        $('#p1answer3').html(`(D.)  ${this.pAnswer3}`)
+        $('#p1answer3').removeClass('incorrect correct')}
         else $('#p1answer3').empty()
       $('#p2question').empty()
       $('#p2answer0').empty()
@@ -183,10 +189,16 @@ var game = {
       else {
         $('#p2question').html(this.pQuestion)
         $('#p2answer0').html(`(A.)  ${this.pAnswer0}`)
+        $('#p2answer0').removeClass('incorrect correct')
         $('#p2answer1').html(`(B.)  ${this.pAnswer1}`)
-        if (this.numAnswers >= 3) $('#p2answer2').html(`(C.)  ${this.pAnswer2}`)
+        $('#p2answer1').removeClass('incorrect correct')
+        if (this.numAnswers >= 3) {
+          $('#p2answer2').html(`(C.)  ${this.pAnswer2}`)
+          $('#p2answer2').removeClass('incorrect correct')}
           else $('#p2answer2').empty()
-        if (this.numAnswers >= 4) $('#p2answer3').html(`(D.)  ${this.pAnswer3}`)
+        if (this.numAnswers >= 4) {
+          $('#p2answer3').html(`(D.)  ${this.pAnswer3}`)
+          $('#p2answer3').removeClass('incorrect correct')}
           else $('#p2answer3').empty()
         $('#p1question').empty()
         $('#p1answer0').empty()
