@@ -12,6 +12,8 @@
     *   2328 Friday, 15 March 2019 (EDT) [17970]
     *   0132 Saturday, 16 March 2019 (EDT) [17971]
     *   0554 Sunday, 17 March 2019 (EDT) [17972]
+    *   2305 Monday, 18 March 2019 (EDT) [17973]
+    *   0047 Tuesday, 19 March 2019 (EDT) [17974]
     ************************************************************************-->
 <!DOCTYPE html>
 <html xmlns='http://www.w3.org/1999/xhtml' lang='en'>
@@ -76,20 +78,20 @@
           id='p2question'></div>
       </div>
       <div class='row border-left border-right'>
-        <div class='col border-right text-center answer' id='p1answer0'></div>
-        <div class='col border-left  text-center answer' id='p2answer0'></div>
+        <div class='col border-right text-left answer' id='p1answer0'></div>
+        <div class='col border-left  text-left answer' id='p2answer0'></div>
       </div>
       <div class='row border-left border-right'>
-        <div class='col border-right text-center answer' id='p1answer1'></div>
-        <div class='col border-left  text-center answer' id='p2answer1'></div>
+        <div class='col border-right text-left answer' id='p1answer1'></div>
+        <div class='col border-left  text-left answer' id='p2answer1'></div>
       </div>
       <div class='row border-left border-right'>
-        <div class='col border-right text-center answer' id='p1answer2'></div>
-        <div class='col border-left  text-center answer' id='p2answer2'></div>
+        <div class='col border-right text-left answer' id='p1answer2'></div>
+        <div class='col border-left  text-left answer' id='p2answer2'></div>
       </div>
       <div class='row border-left border-right'>
-        <div class='col border-right text-center answer' id='p1answer3'></div>
-        <div class='col border-left  text-center answer' id='p2answer3'></div>
+        <div class='col border-right text-left answer' id='p1answer3'></div>
+        <div class='col border-left  text-left answer' id='p2answer3'></div>
       </div>
       <div class='row border-left border-right border-bottom'>
         <div class='col border-right text-center' id='p1status'></div>
@@ -143,10 +145,10 @@
               <label for='questions' id='questionsPrompt'>Number of questions
                 per game (maximum 50):</label>
               <input type='text' class='form-control' id='questions'
-                placeholder='20'/>
-              <label class='mt-3' for='category'
+                placeholder='10'/>
+              <label class='mt-3' for='questionCategory'
                 id='categoryPrompt'>Category:</label>
-              <select class='custom-select' id='category'>
+              <select class='custom-select' id='questionCategory'>
                 <option selected>Select a question category</option>
                 <option value='9'>General Knowledge</option>
                 <option value='10'>Entertainment:  Books</option>
@@ -194,6 +196,8 @@
                 duration for each question in seconds:</label>
               <input type='text' class='form-control' id='timeout'
                 placeholder='30'/>
+              <p class='mt-3'>Changes to settings take effect on the next
+                game.</p>
             </div>
           </div>
           <div class='modal-footer'>
@@ -297,7 +301,7 @@
         <div class='col-auto'>
           Copyright &copy; 2019 Austin Kim under the terms of the <a
             href='https://opensource.org/licenses/MIT/'>MIT License</a>.<br
-          />Last modified at 0554 Sunday, 17 March 2019 (EDT) [17972].<br
+          />Last modified at 0029 Tuesday, 19 March 2019 (EDT) [17974].<br
           />Send errors and broken links to freennix at gmail dot com.
         </div>
         <!--Tooltips must be placed on _img_ elements for proper positioning-->

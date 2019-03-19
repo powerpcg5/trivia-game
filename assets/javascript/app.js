@@ -1,6 +1,6 @@
  //////////////////////////////////////////////////////////////////////////////
  // trivia-game/assets/javascript/app.js
- // Trivia game using JavaScript timers
+ // Trivia game using JavaScript timers (and Open Trivia Database API)
  //
  // 2339 Thursday, 14 March 2019 (EDT) [17969]
  //
@@ -11,17 +11,19 @@
  //   0006 Friday, 15 March 2019 (EDT) [17970]
  //   0325 Saturday, 16 March 2019 (EDT) [17971]
  //   0601 Sunday, 17 March 2019 (EDT) [17972]
+ //   2353 Monday, 18 March 2019 (EDT) [17973]
+ //   0048 Tuesday, 19 March 2019 (EDT) [17974]
  //////////////////////////////////////////////////////////////////////////////
 
  // GLOBAL PARAMETERS, VARIABLES, AND OBJECTS
 
  // Game parameters (initialized to defaults)
-var questions = 20                       // Number of questions per game
+var questions = 10                       // Number of questions per game
 var category = 0                         // Question category (0 for none)
 var difficulty = ''                      // Level of difficulty (empty for none)
 var type = ''                            // Question type (empty for none)
 var timeout = 30                         // Question timeout (in seconds)
-var delay = 5                            // Delay before next trivia question
+var delay = 5000                         // Delay (in ms) before next question
 
  // Player names
 var player1, player2
@@ -32,17 +34,23 @@ var score = {
   p2: 0}
 
  // Which player went first in the most recent game
- //   (0 = no one; 1 = player 1; 2 = player 2)
-var whoWentFirst = 0
-
- // Game over status
+var whoWentFirst = 0                     // 0 = no one (this is the first game)
+                                         // 1 = player 1; 2 = player 2
+// Is game over (or not started)
 var gameOver = true
 
  // JavaScript timers
 var intervalTimer                        // Timer for question interval timer
 var timeoutTimer                         // Timer for delay between questions
 
- // GAME OBJECT
+ // Flag for case where _Instructions_ or _Settings_ is clicked during delay
+var InstructionsOrSettingsClicked = false
+
+ // GAME OBJECT STATES:
+ //   Not started/game over:   gameOver = true
+ //   Running:                 gameOver = false, countdown != 0, paused = false
+ //   Paused:                  gameOver = false, countdown != 0, paused = true
+ //   Delay between questions: gameOver = false, countdown = 0
 var game = {
    // Game-wide member variables
   p1points: 0,                           // Player 1's points
@@ -51,7 +59,7 @@ var game = {
   results: [],                           // Trivia questions for game
   question: 0,                           // Question no.
   countdown: 0,                          // Seconds left to answer question
-  pause: true,                           // Game paused (ignore click/keyboard)
+  paused: false,                         // Game is paused
 
    // Per-question variables
   categoryName: '',                      // Category name
@@ -83,18 +91,19 @@ var game = {
     console.log(`queryURL:  ${queryURL}`)
    // API call
     $.ajax({url: queryURL, method: 'GET'}).then(function(response) {
-      if (response.response_code !== 0)
+      if (response.response_code !== 0) {
         $('#category').text(`Error: response_code = ${response.response_code}`)
+        gameOver = true}
         else {
           game.results = response.results
          // Get first question
           game.getQuestion()
-         // Start a new game
+         // Transition to running state
           gameOver = false
+          game.countdown = timeout       // game.countdown === timeout tells
+          game.displayProgress()         //   displayProgress() to create p. bar
+          game.paused = false
          // Start interval timer
-          game.countdown = timeout
-          game.displayProgress()
-          game.pause = false
           intervalTimer = setInterval(countdownFunction, 1000)}
       })
     return},
@@ -136,19 +145,20 @@ var game = {
         this.numAnswers = 2
         answerArray.splice(index, 1)
        // Set answer (C.)
-        if (answerArray.length >= 0) {
+        if (answerArray.length >= 1) {
           index = Math.floor(answerArray.length * Math.random())
           this.pAnswer2 = answerArray[index].answer
           if (answerArray[index].correct) this.pCorrect = 2
           ++this.numAnswers
-          answerArray.splice(index, 1)}
+          answerArray.splice(index, 1)
        // Set answer (D.)
-        if (answerArray.length >= 0) {
-          index = Math.floor(answerArray.length * Math.random())
-          this.pAnswer3 = answerArray[index].answer
-          if (answerArray[index].correct) this.pCorrect = 3
-          ++this.numAnswers
-          answerArray.splice(index, 1)}
+          if (answerArray.length >= 1) {
+            index = Math.floor(answerArray.length * Math.random())
+            this.pAnswer3 = answerArray[index].answer
+            if (answerArray[index].correct) this.pCorrect = 3
+            ++this.numAnswers
+            answerArray.splice(index, 1)}
+          }
         }
     this.displayQuestion()
     return},
@@ -156,7 +166,7 @@ var game = {
  // displayQuestion() method:  Display trivia question
   displayQuestion() {
     $('#category').text(`Category:  ${this.categoryName}`)
-    if (this.turn === 0) {
+    if (this.turn === 1) {
       $('#p1question').html(this.pQuestion)
       $('#p1answer0').html(`(A.)  ${this.pAnswer0}`)
       $('#p1answer1').html(`(B.)  ${this.pAnswer1}`)
@@ -170,12 +180,12 @@ var game = {
       $('#p2answer2').empty()
       $('#p2answer3').empty()}
       else {
-        $('#p2question').text(this.pQuestion)
-        $('#p2answer0').text(`(A.)  ${this.pAnswer0}`)
-        $('#p2answer1').text(`(B.)  ${this.pAnswer1}`)
-        if (this.numAnswers >= 3) $('#p2answer2').text(`(C.)  ${this.pAnswer2}`)
+        $('#p2question').html(this.pQuestion)
+        $('#p2answer0').html(`(A.)  ${this.pAnswer0}`)
+        $('#p2answer1').html(`(B.)  ${this.pAnswer1}`)
+        if (this.numAnswers >= 3) $('#p2answer2').html(`(C.)  ${this.pAnswer2}`)
           else $('#p2answer2').empty()
-        if (this.numAnswers >= 4) $('#p2answer3').text(`(D.)  ${this.pAnswer3}`)
+        if (this.numAnswers >= 4) $('#p2answer3').html(`(D.)  ${this.pAnswer3}`)
           else $('#p2answer3').empty()
         $('#p1question').empty()
         $('#p1answer0').empty()
@@ -185,11 +195,11 @@ var game = {
     return},
 
  // displayProgress():   Display countdown progress bar
- //   Assumes that if this.pause === false, progress bar is already present
- //   Otherwise, if this.pause === true, needs to recreate the progress bar
+ //   If game.countdown === timeout, we need to (re)create a new progress bar;
+ //     otherwise, the progress bar should already be present
   displayProgress() {
     var progress, progressBar
-    if (this.pause) {
+    if (this.countdown === timeout) {
       $('#p1status').empty()
       $('#p2status').empty()
       progress = $('<div>')
@@ -207,25 +217,15 @@ var game = {
     $('.progress-bar').attr('aria-valuenow', percent.toString())
     $('.progress-bar').css('width', `${percent}%`)
     $('.progress-bar').text(`${this.countdown} sec.`)
-    return},
-
- // updateTurn():  Update player turn on page
-  updateTurn() {
-   // Update player 1 turn field
-    var element = document.getElementById('p1turn')
-    if (this.turn === 1) element.textContent = 'Your turn'
-      else element.textContent = this.p1pass ? 'Pass' : ''
-   // Update player 2 turn field
-    element = document.getElementById('p2turn')
-    if (this.turn === 2) element.textContent = 'Your turn'
-      else element.textContent = this.p2pass ? 'Pass' : ''
     return}
-  }
+
+  } // game object
 
  // GLOBAL FUNCTIONS
 
  // Global resetAll() function (called at beginning and when button is pressed)
 function resetAll() {
+  gameOver = true
    // Set player 1 name
   var playername = document.getElementById('player1name')
   var player = document.getElementById('player1')
@@ -260,13 +260,16 @@ function updateScore() {
 function countdownFunction() {
   if (--game.countdown === 0) {
     clearInterval(intervalTimer)
-    game.pause = true
     if (game.turn === 1) {
       $('#p1status').empty()
-      $('#p1status').text('Time')}
+      $('#p1status').removeClass('correct')
+      $('#p1status').text('Time')
+      $('#p1status').addClass('incorrect')}
       else {
         $('#p2status').empty()
-        $('#p2status').text('Time')}
+        $('#p2status').removeClass('correct')
+        $('#p2status').text('Time')
+        $('#p2status').addClass('incorrect')}
     switch (game.pCorrect) {
       case 0:
         game.turn === 1 ? $('#p1answer0').addClass('correct')
@@ -294,15 +297,21 @@ function timeoutFunction() {
   clearTimeout(timeoutTimer)
   if (++game.question === questions) {
     if (game.p1points > game.p2points) {
+      $('#p1status').removeClass('incorrect')
       $('#p1status').text('You win')
+      $('#p1status').addClass('correct')
       $('#p2status').empty()
       ++score.p1}
       else if (game.p2points > game.p1points) {
+        $('#p2status').removeClass('incorrect')
         $('#p2status').text('You win')
+        $('#p2status').addClass('correct')
         $('#p1status').empty()
         ++score.p2}
         else {
+          $('#p1status').removeClass('incorrect correct')
           $('#p1status').text('You tie')
+          $('#p2status').removeClass('incorrect correct')
           $('#p2status').text('You tie')
           score.p1 += 0.5
           score.p2 += 0.5}
@@ -325,24 +334,35 @@ function timeoutFunction() {
       game.turn = 3 - game.turn
      // Get next question
       game.getQuestion()
-     // Start interval timer
-      game.countdown = timeout
-      game.displayProgress()
-      game.pause = false
-      intervalTimer = setInterval(countdownFunction, 1000)}
+     // Transition to running state
+      game.countdown = timeout           // game.countdown === timeout tells
+      game.displayProgress()             //   displayProgress() to create p. bar
+     // Handle case where _Instructinos_ or _Settings_ was clicked during delay
+      if (InstructionsOrSettingsClicked) {
+       // Pause game
+        $('#pause').removeClass('btn-outline-warning')
+        $('#pause').text('Unpause Game')
+        $('#pause').addClass('btn-warning')
+        game.paused = true}
+        else {
+         // Start interval timer
+          intervalTimer = setInterval(countdownFunction, 1000)
+          game.paused = false}
+      }
+  InstructionsOrSettingsClicked = false
   return}
 
  // MODAL CALLBACK FUNCTIONS
 
  // If _Reset All_ be clicked, stop any currently playing game
 $('#resetAll').click(function() {
+   // Clear all timers
+  clearInterval(intervalTimer)
+  clearTimeout(timeoutTimer)
    // Unpause game if paused
   $('#pause').removeClass('btn-warning')
   $('#pause').text('Pause Game')
   $('#pause').addClass('btn-outline-warning')
-   // Clear all timers
-  clearInterval(intervalTimer)
-  clearTimeout(timeoutTimer)
    // Remove any progress bars
   $('#p1status').empty()
   $('#p2status').empty()
@@ -353,13 +373,13 @@ $('#resetAll').click(function() {
 
  // Likewise, if _New Game_ be clicked, stop any currently playing game
 $('#newGame').click(function() {
+   // Clear all timers
+  clearInterval(intervalTimer)
+  clearTimeout(timeoutTimer)
    // Unpause game if paused
   $('#pause').removeClass('btn-warning')
   $('#pause').text('Pause Game')
   $('#pause').addClass('btn-outline-warning')
-   // Clear all timers
-  clearInterval(intervalTimer)
-  clearTimeout(timeoutTimer)
    // Remove any progress bars
   $('#p1status').empty()
   $('#p2status').empty()
@@ -370,24 +390,61 @@ $('#newGame').click(function() {
   return}
   )
 
- // If _Pause Game_ be clicked, toggle game.pause and suspend/reactivate timers
-$('#pauseGame').click(function() {
+ // If _Pause Game_ be clicked, toggle game.paused and suspend/reactivate timers
+$('#pause').click(function() {
+   // _Pause Game_ has no effect during the delay between questions
   if (!gameOver && game.countdown !== 0) {
-    if (!game.pause) {
+    if (!game.paused) {
      // Pause game
-      game.pause = true
       clearInterval(intervalTimer)
+      $('.progress-bar').removeClass('progress-bar-animated')
       $('#pause').removeClass('btn-outline-warning')
       $('#pause').text('Unpause Game')
-      $('#pause').addClass('btn-warning')}
+      $('#pause').addClass('btn-warning')
+      game.paused = true}
       else {
      // Unpause game
         $('#pause').removeClass('btn-warning')
         $('#pause').text('Pause Game')
         $('#pause').addClass('btn-outline-warning')
+        $('.progress-bar').addClass('progress-bar-animated')
         intervalTimer = setInterval(countdownFunction, 1000)
-        game.pause = false}
+        game.paused = false}
     }
+  return}
+  )
+
+ // If _Instructions_ be clicked, also pause the game (if running)
+ // If _Instructions_ be clicked during the delay between questions, raise the
+ //   _InstructionsOrSettingsClicked_ flag, which will pause after the timeout
+$('#instructions').click(function() {
+  if (!gameOver && game.countdown !== 0 && !game.paused) {
+   // Pause game
+    clearInterval(intervalTimer)
+    $('.progress-bar').removeClass('progress-bar-animated')
+    $('#pause').removeClass('btn-outline-warning')
+    $('#pause').text('Unpause Game')
+    $('#pause').addClass('btn-warning')
+    game.paused = true}
+    else if (!gameOver && game.countdown === 0)
+      InstructionsOrSettingsClicked = true
+  return}
+  )
+
+ // If _Settings_ be clicked, also pause the game (if running)
+ // If _Settings_ be clicked during the delay between questions, raise the
+ //   _InstructionsOrSettingsClicked_ flag, which will pause after the timeout
+$('#settings').click(function() {
+  if (!gameOver && game.countdown !== 0 && !game.paused) {
+   // Pause game
+    clearInterval(intervalTimer)
+    $('.progress-bar').removeClass('progress-bar-animated')
+    $('#pause').removeClass('btn-outline-warning')
+    $('#pause').text('Unpause Game')
+    $('#pause').addClass('btn-warning')
+    game.paused = true}
+    else if (!gameOver && game.countdown === 0)
+      InstructionsOrSettingsClicked = true
   return}
   )
 
@@ -425,12 +482,12 @@ $('#settingsModalOK').click(function() {
       else {
         questions = number
    // Get question category
-        value = $('#category').val()
+        value = $('#questionCategory').val()
         if (value === '') number = 0
           else number = parseInt(value)
    // Validate question category
         if (isNaN(number)) number = 0
-          else if (number < 9 || number >= 32) number = 0
+          else if (number < 9 || number > 32) number = 0
             else category = number
    // Get difficulty level
         value = $('#difficulty').val()
@@ -526,57 +583,72 @@ $(document).keyup(function(event) {
   )
 
  // This main function is called when a user has attempted to select an answer
+ //   (and the game is in progress and not paused)
 function selectAnswer(turn, option) {
-  if (gameOver || game.pause || turn !== game.turn || option >= game.numAnswers)
-    return
-  clearInterval(intervalTimer)
+  if (!gameOver && game.countdown !== 0 && !game.paused &&
+    option < game.numAnswers) {
+    game.countdown = 0                   // Lock out further mouse/key input
+    clearInterval(intervalTimer)
    // Highlight correct answer in green
-  switch (game.pCorrect) {
-    case 0:
-      turn === 1 ? $('#p1answer0').addClass('correct')
-                 : $('#p2answer0').addClass('correct')
-      break
-    case 1:
-      turn === 1 ? $('#p1answer1').addClass('correct')
-                 : $('#p2answer1').addClass('correct')
-      break
-    case 2:
-      turn === 1 ? $('#p1answer2').addClass('correct')
-                 : $('#p2answer2').addClass('correct')
-      break
-    case 3:
-      turn === 1 ? $('#p1answer3').addClass('correct')
-                 : $('#p2answer3').addClass('correct')
-      }
-   // If answer be incorrect, highlight incorrect answer in red
-  if (option !== game.pCorrect) {
-    switch (option) {
+    switch (game.pCorrect) {
       case 0:
-        turn === 1 ? $('#p1answer0').addClass('incorrect')
-                   : $('#p2answer0').addClass('incorrect')
+        turn === 1 ? $('#p1answer0').addClass('correct')
+                   : $('#p2answer0').addClass('correct')
         break
       case 1:
-        turn === 1 ? $('#p1answer1').addClass('incorrect')
-                   : $('#p2answer1').addClass('incorrect')
+        turn === 1 ? $('#p1answer1').addClass('correct')
+                   : $('#p2answer1').addClass('correct')
         break
       case 2:
-        turn === 1 ? $('#p1answer2').addClass('incorrect')
-                   : $('#p2answer2').addClass('incorrect')
+        turn === 1 ? $('#p1answer2').addClass('correct')
+                   : $('#p2answer2').addClass('correct')
         break
       case 3:
-        turn === 1 ? $('#p1answer3').addClass('incorrect')
-                   : $('#p2answer3').addClass('incorrect')
+        turn === 1 ? $('#p1answer3').addClass('correct')
+                   : $('#p2answer3').addClass('correct')
         }
-    turn === 1 ? $('#p1status').text('Incorrect')
-               : $('#p2status').text('Incorrect')}
-    else {
-      turn === 1 ? $('#p1status').text('Correct')
-                 : $('#p2status').text('Correct')
-      if (turn === 1) ++game.p1points
-        else ++game.p2points
-      game.updatePoints()}
+   // If answer be incorrect, highlight incorrect answer in red
+    if (option !== game.pCorrect) {
+      switch (option) {
+        case 0:
+          turn === 1 ? $('#p1answer0').addClass('incorrect')
+                     : $('#p2answer0').addClass('incorrect')
+          break
+        case 1:
+          turn === 1 ? $('#p1answer1').addClass('incorrect')
+                   : $('#p2answer1').addClass('incorrect')
+          break
+        case 2:
+          turn === 1 ? $('#p1answer2').addClass('incorrect')
+                     : $('#p2answer2').addClass('incorrect')
+          break
+        case 3:
+          turn === 1 ? $('#p1answer3').addClass('incorrect')
+                     : $('#p2answer3').addClass('incorrect')
+          }
+      if (turn === 1) {
+        $('#p1status').removeClass('correct')
+        $('#p1status').text('Incorrect')
+        $('#p1status').addClass('incorrect')}
+        else {
+          $('#p2status').removeClass('correct')
+          $('#p2status').text('Incorrect')
+          $('#p2status').addClass('incorrect')}
+      }
+      else {
+        if (turn === 1) {
+          $('#p1status').removeClass('incorrect')
+          $('#p1status').text('Correct')
+          $('#p1status').addClass('correct')}
+          else {
+            $('#p2status').removeClass('incorrect')
+            $('#p2status').text('Correct')
+            $('#p2status').addClass('correct')}
+        if (turn === 1) ++game.p1points
+          else ++game.p2points
+        game.updatePoints()}
    // Delay before advancing to next question
-  timeoutTimer = setTimeout(timeoutFunction, delay)
+    timeoutTimer = setTimeout(timeoutFunction, delay)}
   return}
 
  // Show reset modal to start it all

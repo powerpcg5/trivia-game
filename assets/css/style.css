@@ -9,6 +9,7 @@
   *
   * Modified:
   *   0555 Sunday, 17 March 2019 (EDT) [17972]
+  *   2110 Monday, 18 March 2019 (EDT) [17973]
   ****************************************************************************/
 
  /* Body */
@@ -42,6 +43,7 @@ body {
   font-style: italic}
 
 .answer:hover {
+  font-weight: bold;
   text-decoration: underline}
 
  /* Classes for highlighting answers as correct vs. incorrect */
@@ -54,6 +56,10 @@ body {
  /* Player status/message */
 #p1status, #p2status {
   font-size: var(--main-font-size)}
+
+ /* Progress bar height */
+ .progress {
+   height: 24px}
 
  /* Footer */
 hr.lainbow {
