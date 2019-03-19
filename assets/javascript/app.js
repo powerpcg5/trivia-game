@@ -12,7 +12,7 @@
  //   0325 Saturday, 16 March 2019 (EDT) [17971]
  //   0601 Sunday, 17 March 2019 (EDT) [17972]
  //   2353 Monday, 18 March 2019 (EDT) [17973]
- //   0048 Tuesday, 19 March 2019 (EDT) [17974]
+ //   0111 Tuesday, 19 March 2019 (EDT) [17974]
  //////////////////////////////////////////////////////////////////////////////
 
  // GLOBAL PARAMETERS, VARIABLES, AND OBJECTS
@@ -97,6 +97,7 @@ var game = {
         else {
           game.results = response.results
          // Get first question
+          game.question = 0              // Reset question no.
           game.getQuestion()
          // Transition to running state
           gameOver = false
